@@ -1,9 +1,5 @@
 import { isMainThread, markAsUncloneable, Worker } from 'node:worker_threads';
-import {
-  getFilesDirPath,
-  getOutputsDir,
-  logProgress,
-} from '../utils';
+import { getFilesDirPath, getOutputsDir, logProgress } from '../utils';
 import fs from 'node:fs';
 import path from 'node:path';
 import './worker';

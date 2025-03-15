@@ -1,4 +1,4 @@
-import { utils, WorkBook, writeFileAsync, writeFile } from 'xlsx';
+import { utils, WorkBook, writeFile } from 'xlsx';
 import { faker } from '@faker-js/faker';
 import { v4 as uuidv4 } from 'uuid'; // generate unique id
 import 'dotenv/config';
@@ -26,27 +26,22 @@ const getNewWorkbook = (): WorkBook => {
   return workbook;
 };
 
-const getNewWorkbooksMultiple = (cnt = 20): WorkBook[] => {
+const getNewWorkbooksBatch = (cnt = 20): WorkBook[] => {
   return Array.from({ length: cnt }).map(() => getNewWorkbook());
 };
 
-const writeWorkbook = (workbook: WorkBook): Promise<boolean> => {
-  return new Promise((resolve, reject) => {
-    writeFile(workbook, `${filesDir}/${uuidv4()}.xlsx`);
-    resolve(true);
-  });
+const writeWorkbook = (workbook: WorkBook) => {
+  writeFile(workbook, `${filesDir}/${uuidv4()}.xlsx`);
 };
 
-const writeWorkbooksParallely = async (
-  workbooks: WorkBook[],
-): Promise<boolean[]> => {
-  return Promise.all(workbooks.map((workbook) => writeWorkbook(workbook)));
+const writeWorkbooksBatch = (workbooks: WorkBook[]) => {
+  return workbooks.map((workbook) => writeWorkbook(workbook));
 };
 
-const seedWorkbooks = async (parallelism = 20) => {
-  const workbooks = getNewWorkbooksMultiple(parallelism);
-  await writeWorkbooksParallely(workbooks);
-  console.log(`Completed writing ${parallelism} workbooks`);
+const seedWorkbooks = async (batchSize = 20) => {
+  const workbooks = getNewWorkbooksBatch(batchSize);
+  writeWorkbooksBatch(workbooks);
+  console.log(`Completed writing ${batchSize} workbooks`);
 };
 
 seedWorkbooks(20);

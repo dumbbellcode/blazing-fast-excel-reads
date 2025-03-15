@@ -1,8 +1,4 @@
-import {
-  isMainThread,
-  parentPort,
-  workerData,
-} from 'node:worker_threads';
+import { isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { extractCellsFromWsBuffer } from '../utils';
 
 if (!isMainThread) {
