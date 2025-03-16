@@ -17,7 +17,8 @@ if (!noOfSeedFiles) {
 }
 
 let noOfCorruptFiles =
-  (Number.parseFloat(percentOFCorruptFiles) * Number.parseInt(noOfSeedFiles)) / 100;
+  (Number.parseFloat(percentOFCorruptFiles) * Number.parseInt(noOfSeedFiles)) /
+  100;
 noOfCorruptFiles = Math.max(Math.ceil(noOfCorruptFiles), 1);
 
 const corruptFilesDir = join(__dirname, 'corrupt-assets');
@@ -59,7 +60,9 @@ const writeWorkbooksBatch = (workbooks: WorkBook[]) => {
 
 const seedWorkbooks = async () => {
   console.log('Seeder is running');
-  const filesInEachBatch = Math.max(Number.parseInt(noOfSeedFiles) / noOfCorruptFiles);
+  const filesInEachBatch = Math.max(
+    Number.parseInt(noOfSeedFiles) / noOfCorruptFiles,
+  );
 
   let seededFilesCount = 0;
   let corruptFilesCount = 0;

@@ -38,6 +38,7 @@ async function extractInformation() {
     workerPool[worker.threadId] = worker;
   }
   console.log('started all workers');
+  console.time('scriptCompletionTime');
 
   const originalSize = files.length;
   const interval = setInterval(() => {
@@ -117,6 +118,10 @@ async function extractInformation() {
   const onCompletion = () => {
     clearInterval(interval);
     console.log('Completed processing all files');
+    console.log(
+      `Total files: ${originalSize}, Successful: ${successData.length}, Failed: ${failureData.length}`,
+    );
+    console.timeEnd('scriptCompletionTime');
 
     const outputDir = getOutputsDir();
     fs.writeFileSync(`${outputDir}/success.json`, JSON.stringify(successData));
