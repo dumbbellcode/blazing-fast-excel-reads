@@ -34,7 +34,8 @@ const getNewWorkbook = (): WorkBook => {
   workbook.Sheets = {};
 
   const data = [];
-  for (let row = 0; row < 100; row++) {
+  const noOfRows = Math.floor(Math.random() * 20) + 80; // A number between 80 and 100
+  for (let row = 0; row < noOfRows; row++) {
     const obj: Record<string, string> = {};
     for (let col = 0; col < 70; col++) {
       obj[`Column ${col}`] = faker.string.alphanumeric(10);
