@@ -1,8 +1,27 @@
 import { utils, WorkBook, writeFile } from 'xlsx';
 import { faker } from '@faker-js/faker';
-import { v4 as uuidv4 } from 'uuid'; // generate unique id
+import { v4 as uuidv4 } from 'uuid';
 import 'dotenv/config';
 import { createInputsDir, getFilesDirPath } from './utils';
+import { readdirSync, copyFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const percentOFCorruptFiles = process.env.PERCENT_CORRUPT_FILES;
+const noOfSeedFiles = process.env.NO_OF_SEED_FILES;
+
+if (!percentOFCorruptFiles) {
+  throw 'PERCENT_CORRUPT_FILES env is required';
+}
+if (!noOfSeedFiles) {
+  throw 'NO_OF_SEED_FILES env is required';
+}
+
+let noOfCorruptFiles =
+  (Number.parseFloat(percentOFCorruptFiles) * Number.parseInt(noOfSeedFiles)) / 100;
+noOfCorruptFiles = Math.max(Math.ceil(noOfCorruptFiles), 1);
+
+const corruptFilesDir = join(__dirname, 'corrupt-assets');
+const corruptFiles = readdirSync(corruptFilesDir);
 
 createInputsDir();
 const filesDir = getFilesDirPath();
@@ -38,10 +57,37 @@ const writeWorkbooksBatch = (workbooks: WorkBook[]) => {
   return workbooks.map((workbook) => writeWorkbook(workbook));
 };
 
-const seedWorkbooks = async (batchSize = 20) => {
-  const workbooks = getNewWorkbooksBatch(batchSize);
-  writeWorkbooksBatch(workbooks);
-  console.log(`Completed writing ${batchSize} workbooks`);
+const seedWorkbooks = async () => {
+  console.log('Seeder is running');
+  const filesInEachBatch = Math.max(Number.parseInt(noOfSeedFiles) / noOfCorruptFiles);
+
+  let seededFilesCount = 0;
+  let corruptFilesCount = 0;
+  while (seededFilesCount < Number.parseInt(noOfSeedFiles)) {
+    let batchSize = filesInEachBatch;
+    if (Number.parseInt(noOfSeedFiles) - seededFilesCount < filesInEachBatch) {
+      batchSize = Number.parseInt(noOfSeedFiles) - seededFilesCount;
+    }
+
+    // Seed batchSize - 1 normal files and 1 corrupt file
+    const workbooks = getNewWorkbooksBatch(batchSize - 1);
+    writeWorkbooksBatch(workbooks);
+    seededFilesCount += batchSize;
+    copyRandomCorruptFileToInputs();
+    ++corruptFilesCount;
+  }
+  console.log(
+    `Seeded ${seededFilesCount - corruptFilesCount} normal files & ${corruptFilesCount} corrupt file(s)`,
+  );
 };
 
-seedWorkbooks(20);
+const copyRandomCorruptFileToInputs = () => {
+  const randomFile =
+    corruptFiles[Math.floor(Math.random() * corruptFiles.length)];
+  const newFileName = `${uuidv4()}-${randomFile}`;
+  const srcPath = join(corruptFilesDir, randomFile);
+  const destPath = join(filesDir, newFileName);
+  copyFileSync(srcPath, destPath);
+};
+
+seedWorkbooks();

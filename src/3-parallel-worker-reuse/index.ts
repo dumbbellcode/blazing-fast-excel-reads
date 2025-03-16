@@ -5,7 +5,7 @@ import path from 'node:path';
 import './worker';
 import { cpus } from 'node:os';
 import { EventEmitter } from 'node:stream';
-import { randomUUID } from 'node:crypto';
+import { v4 as uuidv4 } from 'uuid';
 const maxWorkers = Math.max(1, cpus().length - 1);
 
 enum Events {
@@ -15,7 +15,7 @@ enum Events {
   WorkerExit = 'WorkerExit',
 }
 
-const cellsToRead: string[] = ['A1','A19', 'D4', 'C12'];
+const cellsToRead: string[] = ['A1', 'A19', 'D4', 'C12'];
 const workertimeout = 3000;
 const workerMemoryLimitMB = 250;
 const emitter = new EventEmitter();
@@ -46,7 +46,6 @@ async function extractInformation() {
   }, 2000);
   let timeout: string | number | NodeJS.Timeout | undefined;
   const timersMap: Record<string, any> = {};
-  let completedFlag = false;
 
   const processAFile = (threadId: string) => {
     const fileName = files.pop();
@@ -66,7 +65,7 @@ async function extractInformation() {
         message: 'Worker timed out',
       });
     }, workertimeout);
-    const randomId = randomUUID();
+    const randomId = uuidv4();
     timersMap[randomId] = timeout;
     worker.postMessage({
       fileBuffer,
@@ -107,7 +106,7 @@ async function extractInformation() {
     if (Object.keys(workerPool).length === 0) {
       onCompletion();
     }
-    
+
     // Nothing to process
     if (!files.length) return;
 
