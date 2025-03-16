@@ -1,4 +1,4 @@
-import { utils, WorkBook, writeFile } from 'xlsx';
+import { utils, WorkBook, writeFile, writeFileAsync } from 'xlsx';
 import { faker } from '@faker-js/faker';
 import { v4 as uuidv4 } from 'uuid';
 import 'dotenv/config';
@@ -55,12 +55,21 @@ const writeWorkbook = (workbook: WorkBook) => {
   writeFile(workbook, `${filesDir}/${uuidv4()}.xlsx`);
 };
 
+const writeWorkbookAsync = (workbook: WorkBook) => {
+  return new Promise((resolve, reject) => {
+    writeFileAsync(`${filesDir}/${uuidv4()}.xlsx`, workbook, {}, () => {
+        resolve(true);
+    });
+  });
+};
+
 const writeWorkbooksBatch = (workbooks: WorkBook[]) => {
-  return workbooks.map((workbook) => writeWorkbook(workbook));
+  return Promise.all(workbooks.map((workbook) => writeWorkbookAsync(workbook)));
 };
 
 const seedWorkbooks = async () => {
   console.log('Seeder is running');
+  console.time('scriptCompletionTime')
   const filesInEachBatch = Math.max(
     Number.parseInt(noOfSeedFiles) / noOfCorruptFiles,
   );
@@ -75,11 +84,12 @@ const seedWorkbooks = async () => {
 
     // Seed batchSize - 1 normal files and 1 corrupt file
     const workbooks = getNewWorkbooksBatch(batchSize - 1);
-    writeWorkbooksBatch(workbooks);
+    await writeWorkbooksBatch(workbooks);
     seededFilesCount += batchSize;
     copyRandomCorruptFileToInputs();
     ++corruptFilesCount;
   }
+  console.timeEnd('scriptCompletionTime')
   console.log(
     `Seeded ${seededFilesCount - corruptFilesCount} normal files & ${corruptFilesCount} corrupt file(s)`,
   );
