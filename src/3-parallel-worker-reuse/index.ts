@@ -15,7 +15,7 @@ enum Events {
   WorkerExit = 'WorkerExit',
 }
 
-const cellsToRead: string[] = ['A19', 'D4', 'C12'];
+const cellsToRead: string[] = ['A1','A19', 'D4', 'C12'];
 const workertimeout = 3000;
 const workerMemoryLimitMB = 250;
 const emitter = new EventEmitter();
@@ -53,10 +53,6 @@ async function extractInformation() {
 
     if (!fileName) {
       workerPool[threadId].terminate();
-      if (!completedFlag) {
-        completedFlag = true;
-        onCompletion();
-      }
       return;
     }
 
@@ -106,10 +102,15 @@ async function extractInformation() {
   });
 
   emitter.on(Events.WorkerExit, ({ threadId }) => {
+    delete workerPool[threadId];
+
+    if (Object.keys(workerPool).length === 0) {
+      onCompletion();
+    }
+    
     // Nothing to process
     if (!files.length) return;
 
-    delete workerPool[threadId];
     const worker = getNewWorker();
     workerPool[worker.threadId] = worker;
   });
