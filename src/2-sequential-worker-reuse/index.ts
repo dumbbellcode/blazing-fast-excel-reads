@@ -35,12 +35,13 @@ async function extractInformation() {
   }, 2000);
   let worker = getNewWorker();
   let timeOutId: string | number | NodeJS.Timeout | undefined;
+  console.time('scriptCompletionTime');
 
   const processLastFile = () => {
     const fileName = files.pop();
 
-    if (!fileName?.length) {
-      onCompletion();
+    if (!fileName) {
+      worker.terminate();
       return;
     }
 
@@ -79,12 +80,21 @@ async function extractInformation() {
   });
 
   emitter.on(Events.WorkerExit, () => {
+    const fileName = files.pop();
+    if (!fileName) {
+      onCompletion();
+      return;
+    }
     worker = getNewWorker();
   });
 
   const onCompletion = () => {
     clearInterval(interval);
     console.log('Completed processing all files');
+    console.log(
+      `Total files: ${originalSize}, Successful: ${successData.length}, Failed: ${failureData.length}`,
+    );
+    console.timeEnd('scriptCompletionTime');
 
     const outputDir = getOutputsDir();
     fs.writeFileSync(`${outputDir}/success.json`, JSON.stringify(successData));
@@ -95,11 +105,7 @@ async function extractInformation() {
 function getNewWorker() {
   const worker = new Worker(__filename, {
     resourceLimits: { maxOldGenerationSizeMb: workerMemoryLimitMB },
-    execArgv: [
-      '--experimental-strip-types',
-      '--disable-warning=ExperimentalWarning',
-      '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON',
-    ],
+    execArgv: [],
   });
 
   worker.once('online', () => {

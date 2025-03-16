@@ -29,6 +29,7 @@ async function extractInformation() {
     logProgress(files.length, index + 1);
   }, 2000);
 
+  console.time('scriptCompletionTime');
   for (index = 0; index < files.length; index++) {
     const file = files[index];
     const filePath = path.join(filesDir, file);
@@ -50,6 +51,11 @@ async function extractInformation() {
   }
 
   clearInterval(interval);
+  console.log('Completed processing all files');
+  console.log(
+    `Total files: ${files.length}, Successful: ${successData.length}, Failed: ${failureData.length}`,
+  );
+  console.timeEnd('scriptCompletionTime');
 
   const outputDir = getOutputsDir();
   fs.writeFileSync(`${outputDir}/success.json`, JSON.stringify(successData));
@@ -64,11 +70,7 @@ function spawnWorkerAndExtractData(
   return new Promise((resolve, reject) => {
     const worker = new Worker(__filename, {
       resourceLimits: { maxOldGenerationSizeMb: workerMemoryLimitMB },
-      execArgv: [
-        '--experimental-strip-types',
-        '--disable-warning=ExperimentalWarning',
-        '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON',
-      ],
+      execArgv: [],
       workerData: { fileBuffer, cellsToRead, fileName },
     });
     worker.on('message', resolve);

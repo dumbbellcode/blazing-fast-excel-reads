@@ -16,7 +16,7 @@ enum Events {
 }
 
 const cellsToRead: string[] = ['A1', 'A19', 'D4', 'C12'];
-const workertimeout = 3000;
+const workertimeout = 2000;
 const workerMemoryLimitMB = 250;
 const emitter = new EventEmitter();
 
@@ -41,10 +41,11 @@ async function extractInformation() {
   console.time('scriptCompletionTime');
 
   const originalSize = files.length;
+  const logProgressAfterMs = 3000;
   const interval = setInterval(() => {
     const currentSize = files.length;
     logProgress(originalSize, originalSize - currentSize);
-  }, 2000);
+  }, logProgressAfterMs);
   let timeout: string | number | NodeJS.Timeout | undefined;
   const timersMap: Record<string, any> = {};
 
@@ -132,11 +133,7 @@ async function extractInformation() {
 function getNewWorker() {
   const worker = new Worker(__filename, {
     resourceLimits: { maxOldGenerationSizeMb: workerMemoryLimitMB },
-    execArgv: [
-      '--experimental-strip-types',
-      '--disable-warning=ExperimentalWarning',
-      '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON',
-    ],
+    execArgv: [],
   });
 
   const threadId = worker.threadId;

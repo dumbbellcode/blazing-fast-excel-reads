@@ -58,7 +58,7 @@ const writeWorkbook = (workbook: WorkBook) => {
 const writeWorkbookAsync = (workbook: WorkBook) => {
   return new Promise((resolve, reject) => {
     writeFileAsync(`${filesDir}/${uuidv4()}.xlsx`, workbook, {}, () => {
-        resolve(true);
+      resolve(true);
     });
   });
 };
@@ -69,7 +69,7 @@ const writeWorkbooksBatch = (workbooks: WorkBook[]) => {
 
 const seedWorkbooks = async () => {
   console.log('Seeder is running');
-  console.time('scriptCompletionTime')
+  console.time('scriptCompletionTime');
   const filesInEachBatch = Math.max(
     Number.parseInt(noOfSeedFiles) / noOfCorruptFiles,
   );
@@ -89,7 +89,7 @@ const seedWorkbooks = async () => {
     copyRandomCorruptFileToInputs();
     ++corruptFilesCount;
   }
-  console.timeEnd('scriptCompletionTime')
+  console.timeEnd('scriptCompletionTime');
   console.log(
     `Seeded ${seededFilesCount - corruptFilesCount} normal files & ${corruptFilesCount} corrupt file(s)`,
   );

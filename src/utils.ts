@@ -11,6 +11,14 @@ export function extractCellsFromWsBuffer(
     const wb = read(worksheetBuffer, { type: 'buffer' });
     const data: Record<string, any> = {};
     const ws = wb.Sheets[wb.SheetNames[0]];
+
+    if (!ws) {
+      return {
+        success: false,
+        message: 'Sheet not found',
+      };
+    }
+
     for (const cellAdd of cellsToRead) {
       data[cellAdd] = ws[cellAdd]?.v ?? null;
     }
@@ -62,6 +70,6 @@ export function getFilesDirPath(): string {
 }
 
 export function logProgress(total: number, processed: number) {
-  const perc = (processed / total) * 100;
+  const perc = Math.floor((processed / total) * 100);
   console.log(`Progress: ${perc}% | Processed ${processed} files `);
 }
