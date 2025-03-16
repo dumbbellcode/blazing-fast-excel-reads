@@ -51,7 +51,7 @@ async function extractInformation() {
   }
 
   clearInterval(interval);
-  console.log('Completed processing all files');
+  console.log('Completed processing all files, you can find the extracted data in output directory');
   console.log(
     `Total files: ${files.length}, Successful: ${successData.length}, Failed: ${failureData.length}`,
   );
