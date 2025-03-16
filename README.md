@@ -2,11 +2,6 @@
 
 This repository demonstrates  processing large numbers of Excel files using Node.js, achieving speeds of 20,000 files per minute. Processing here means extracting data of some cells from all the files. Please find the related blog post [here](https://example.com)
 
-## Description
-
-A practical exploration of different approaches to handle massive Excel file processing workloads in Node.js, comparing various worker thread patterns and optimizations.
-
-
 ## Usage & Installation
 
 ### Prerequisites
